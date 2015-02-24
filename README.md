@@ -12,7 +12,10 @@ Uwezo: Test scores, by district, for Tanzania
 4. Buttons for English, Swahili, Math.
 5. ~~`topoJSON` the Tanzania district shapefiles.~~
 6. Turn off event listeners as map is fading in.
+7. Color scale: color-blind-safe?
+8. Make a list of all districts that didn't name-merge. Fix!
   
+
 
 ### Notes on GeoJSON/TopoJSON
 

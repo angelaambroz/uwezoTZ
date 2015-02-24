@@ -45,7 +45,7 @@
 
 		var w = 1000,
 			h = 700,
-			userSubset, userAge, userSelection,
+			userSubject,
 			formatted = d3.format("%");
 
 		var svg = d3.select("body")
@@ -102,7 +102,7 @@
 
 			d3.select("#subject")
 				.text(function() {
-					if (!userAge) {
+					if (!userSubject) {
 						return "English";
 					} else {
 						return userSubject;
@@ -110,7 +110,13 @@
 				});
 
 			d3.select("#subjectScore")
-				.text(function(d) { return d[userSubject]; });
+				.text(function() { 
+					if (!userSubject) {
+						return formatted(d.properties.english); 
+					} else {
+						return formatted(d.properties[userSubject]);
+					}
+					});
 
 			   
 			d3.select("#tooltip").classed("hidden", false);
@@ -280,15 +286,15 @@
 				districts.transition()
 				 	.duration(750)
 				 	.attr("fill", function(d) {
-				   		if (d.properties.avg_4yrs) {
-							return quantize(d.properties.avg_4yrs);
+				   		if (d.properties.english) {
+							return quantize(d.properties.english);
 				   		} else {
 				   			return "rgb(232,232,232)";
 				   		}					   		
 				   	});
 
 				districts.on("click", function(d) {
-					console.log(d.properties.avg_4yrs);
+					console.log(d.properties.english);
 				});
 
 
