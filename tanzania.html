@@ -11,13 +11,33 @@
 	<link href='http://fonts.googleapis.com/css?family=Shadows+Into+Light+Two' rel='stylesheet' type='text/css'>
 	<style type="text/css">
 
+#tooltip {
+	position: absolute;
+	width: 150px;
+	height: auto;
+	padding: 5px 10px;
+	background-color: white;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	-webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+	-moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+	box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+	pointer-events: none;
+}
+
+#tooltip.hidden {
+	display: none;
+}
+
+
 	</style>
 </head>
 <body>
 
 
 		<div id="tooltip" class="hidden" style="left: 429px, top: 489.6px">
-			<p>The enrolment rate for <strong><span id="age">4</span> year old <span id="gender">girls</span></strong> in <strong><span id="county">Mandera</span></strong> county is <span id="avg_enrolment">0.22</span>.</p>
+			<p>The percentage of kids in <strong><span id="county">Mandera</span></strong> district who scored the top score on their <strong><span id="subject">English</span> test was <span id="subjectScore">50%</span>.</p>
 		</div>
 
 
@@ -35,7 +55,7 @@
 
 		var quantize = d3.scale.quantize()
 			.domain([0, 1])
-			.range(["rgb(215,25,28)", //red/green scale - 5-point
+			.range(["rgb(215,25,28)",
 					"rgb(253,174,97)", 
 					"rgb(255,255,191)", 
 					"rgb(166,217,106)",
@@ -45,11 +65,24 @@
 
 		var projection = d3.geo.mercator()
 			.rotate([5,0,0])
-			.translate([w/30-2400,h/2+40])
-			.scale(3800);
+			.translate([w/30-1650,h/2-350])
+			.scale(2800);
 
 		var path = d3.geo.path()
 			.projection(projection);
+
+
+		//Logo
+
+		var logo = svg.selectAll("image").data([0]);
+          
+          logo.enter()
+                .append("svg:image")
+                .attr("xlink:href", "../_resources/uwezo_logo.png")
+                .attr("x", "600")
+                .attr("y", "100")
+                .attr("width", "200")
+                .attr("height", "100");
 
 
 		function mouseover(d) {
@@ -67,35 +100,17 @@
 			d3.select("#county")
 				.text(d.id);
 
-			d3.select("#age")
+			d3.select("#subject")
 				.text(function() {
 					if (!userAge) {
-						return 4;
+						return "English";
 					} else {
-						return userAge;
+						return userSubject;
 					}
 				});
 
-			d3.select("#gender")
-				.text(function() {
-					if (!userSubset) {
-						return "boys and girls";
-					} else {
-						return userSubset;
-					}
-				});
-
-			d3.select("#avg_enrolment")
-				.text(function() {
-					if (d.id === "Kirinyaga") {
-						return "not available (this county was not surveyed)";
-					}
-					else if (!userSelection) {
-						return formatted(d.properties.avg_4yrs);
-					} else {
-						return formatted(d.properties[userSelection]);
-					}
-				});
+			d3.select("#subjectScore")
+				.text(function(d) { return d[userSubject]; });
 
 			   
 			d3.select("#tooltip").classed("hidden", false);
@@ -106,34 +121,29 @@
 			d3.select("#tooltip").classed("hidden", true);
 		};
 
-		//Data
-		d3.json("counties_compressed.json", function(json) {
 
-			d3.csv("enrolment.csv", function(csv) {
+		//Data
+		d3.json("tz_compressed.json", function(json) {
+
+			d3.csv("TZ13.csv", function(csv) {
 
 	            //De-stringing
 	            csv.forEach(function(d) { 
 	            	for (var i = 3; i<=5; i++) {
-	              		d["boys_"+i+"yrs"] = +d["boys_"+i+"yrs"];
-	              		d["girls_"+i+"yrs"] = +d["girls_"+i+"yrs"];
-	              		//d.avg_all = +d.avg_all;
-	              		d.avg_4yrs = +d.avg_4yrs;
+	              		d.english = +d.english;
+	              		d.swahili = +d.swahili;
+	              		d.math = +d.math;
 	             		}
 	            });
 
-	           	var geodata = json.objects.counties.geometries;
+	           	var geodata = json.objects.tz.geometries;
 
 	            //Can I collapse this all into a loop?
 	            for (var i = 0; i < csv.length; i++) {
-	            	var csvCounty = csv[i].county,
-	            		//avg_all = csv[i].avg_all,
-	            		avg_4yrs = csv[i].avg_4yrs,
-	            		boys_3yrs = csv[i].boys_3yrs,
-	            		boys_4yrs = csv[i].boys_4yrs,
-	            		boys_5yrs = csv[i].boys_5yrs,
-	            		girls_3yrs = csv[i].girls_3yrs,
-	            		girls_4yrs = csv[i].girls_4yrs,
-	            		girls_5yrs = csv[i].girls_5yrs;
+	            	var csvCounty = csv[i].district,
+	            		english = csv[i].english,
+	            		swahili = csv[i].swahili,
+	            		math = csv[i].math;
 
 	            //Merging csv with geojson data
 	            	for (var j = 0; j < geodata.length; j++) {
@@ -143,14 +153,9 @@
 	            		if (csvCounty == jsonCounty) {
 
 	            			geodata[j].properties = {};
-	            			//geodata[j].properties.avg_all = avg_all;
-	            			geodata[j].properties.avg_4yrs = avg_4yrs;
-	            			geodata[j].properties.boys_3yrs = boys_3yrs;
-	            			geodata[j].properties.boys_4yrs = boys_4yrs;
-	            			geodata[j].properties.boys_5yrs = boys_5yrs;
-	            			geodata[j].properties.girls_3yrs = girls_3yrs;
-	            			geodata[j].properties.girls_4yrs = girls_4yrs;
-	            			geodata[j].properties.girls_5yrs = girls_5yrs;
+	            			geodata[j].properties.english = english;
+	            			geodata[j].properties.math = math,
+	            			geodata[j].properties.swahili = swahili;
 
 	            			break;
 
@@ -158,15 +163,14 @@
 	            	}
 	            }
 
+	            var geoTZ = topojson.feature(json, json.objects.tz);
 
-	            var geoCounties = topojson.feature(json, json.objects.counties);
-
-				var counties = svg.selectAll("path")
-				   .data(geoCounties.features);
+				var districts = svg.selectAll("path")
+				   .data(geoTZ.features);
 
 
 				//Prepping for a fade-in
-				counties.enter()
+				districts.enter()
 				   .append("path")
 				   .attr("d", path)
 				   .attr("class", function(d) { return "county " + d.id; })
@@ -174,147 +178,6 @@
 				   .attr("fill", "white")
 					.on("mouseover", mouseover)
 				 	.on("mouseout", mouseout);
-
-
-				//On-canvas buttons
-				var buttons = svg.append("g")
-					.attr("class", "buttons");
-
-				//Boys
-				var boys = buttons.append("g")
-					.on("click", function() {
-						userSubset = "boys";
-						d3.select(".tiny-label")
-							.text("Select age.");			
-					});
-
-				boys.append("circle")
-					.attr("r", 25)
-					.attr("cx", "50px")
-					.attr("cy", "100px")
-					.attr("fill", "#E0E0FF")
-					.classed("gender-circles", true)
-					.on("click", circleHalo);
-
-				boys.append("text")
-					.attr("x", "33px")
-					.attr("y", "105px")
-					.text("Boys");
-
-				//Girls
-				var girls = buttons.append("g")
-					.on("click", function() {
-						userSubset = "girls";
-						d3.select(".tiny-label")
-							.text("Select age.");
-					});
-
-				girls.append("circle")
-					.attr("r", 25)
-					.attr("cx", "100px")
-					.attr("cy", "100px")
-					.attr("fill", "#FFF5FF")
-					.classed("gender-circles", true)
-					.on("click", circleHalo);
-
-				girls.append("text")
-					.attr("x", "85px")
-					.attr("y", "105px")
-					.text("Girls");
-
-
-				//3 year olds
-				var threes = buttons.append("g")
-					.on("click", function() {
-						userAge = 3;
-						updateViz();
-					});
-
-				threes.append("circle")
-					.attr("r", 15)
-					.attr("cx", "50px")
-					.attr("cy", "145px")
-					.classed("age-circles", true)
-					.on("click", circleHalo);
-
-
-				threes.append("text")
-					.attr("x", "48px")
-					.attr("y", "150px")
-					.text("3");
-
-
-				//4 year olds
-				var fours = buttons.append("g")
-					.on("click", function() {
-						userAge = 4;
-						updateViz();
-					});
-				
-				fours.append("circle")
-					.attr("r", 15)
-					.attr("cx", "90px")
-					.attr("cy", "145px")
-					.classed("age-circles", true)
-					.on("click", circleHalo);
-
-				fours.append("text")
-					.attr("x", "85px")
-					.attr("y", "150px")
-					.text("4");
-
-				//5 year olds
-				var fives = buttons.append("g")
-					.on("click", function() {
-						userAge = 5;
-						updateViz();
-					});
-
-				fives.append("circle")
-					.attr("r", 15)
-					.attr("cx", "130px")
-					.attr("cy", "145px")
-					.classed("age-circles", true)
-					.on("click", circleHalo);
-
-				fives.append("text")
-					.attr("x", "125px")
-					.attr("y", "150px")
-					.text("5");
-
-				//Reset button
-				var reset = buttons.append("g")
-					.on("click", function() {
-						d3.select(".tiny-label")
-							.text("Reset to: All-Kenya average.");
-						
-						firstViz();
-					});
-
-				reset.append("rect")
-					.attr("width", 55)
-					.attr("height", 30)
-					.attr("x", "40px")
-					.attr("y", "200px")
-					.attr("stroke", "gray")
-					.attr("fill", "white");
-
-				reset.append("text")
-					.attr("x", "48px")
-					.attr("y", "220px")
-					.text("Reset");
-
-
-				//Tiny label
-				buttons.append("text")
-					.attr("class", "tiny-label")
-					.attr("x", "40px")
-					.attr("y", "175px")
-					.text("Please make your selection.");
-
-				//Moving the buttons around
-				buttons.attr("transform", "translate(0,100) scale(1.3)");
-
 
 				//Title
 				var title = svg.append("g");
@@ -414,7 +277,7 @@
 				
 
 				//Actual viz
-				counties.transition()
+				districts.transition()
 				 	.duration(750)
 				 	.attr("fill", function(d) {
 				   		if (d.properties.avg_4yrs) {
@@ -424,9 +287,10 @@
 				   		}					   		
 				   	});
 
-				counties.on("click", function(d) {
+				districts.on("click", function(d) {
 					console.log(d.properties.avg_4yrs);
 				});
+
 
 				}//end firstViz()
 
@@ -447,7 +311,7 @@
 						return "Selected: " + userSubset + ", " + userAge + " years old.";
 					});
 
-				counties.transition()
+				districts.transition()
 					.duration(750)
 					.attr("fill", function(d) {
 				   		if (d.properties[userSelection]) {
@@ -458,7 +322,7 @@
 				   });
 
 
-				counties.on("click", function(d) {
+				districts.on("click", function(d) {
 					console.log(d.properties[userSelection]);
 				});
 
