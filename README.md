@@ -6,14 +6,17 @@ Uwezo: Test scores, by district, for Tanzania
 
 
 ### To Do
-1. Adapt UWezo/Kenya/preschool choropleth code.
+1. Adapt Uwezo/Kenya/preschool choropleth code.
 2. ~~Prep the data in `csv` form.~~
 3. Static version(s).
 4. Buttons for English, Swahili, Math.
 5. ~~`topoJSON` the Tanzania district shapefiles.~~
 6. Turn off event listeners as map is fading in.
 7. Color scale: color-blind-safe?
-8. Make a list of all districts that didn't name-merge. Fix!
+8. ~~Make a list of all districts that didn't name-merge.~~
+9. ~~Fix the rural/urban name-merge fails (some have "urban" but not "rural").~~
+10. ~~Fix the "Township Authority" name-merge fails.~~
+11. Remaining name-merge fails!
   
 
 

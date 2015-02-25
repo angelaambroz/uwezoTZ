@@ -166,27 +166,31 @@
 	            			break;
 
 	            		}
+
 	            	}
 	            }
 
-	            var geoTZ = topojson.feature(json, json.objects.tz);
 
-				var districts = svg.selectAll("path")
-				   .data(geoTZ.features);
+
+
+	          var geoTZ = topojson.feature(json, json.objects.tz);
+
+			var districts = svg.selectAll("path")
+				.data(geoTZ.features);
 
 
 				//Prepping for a fade-in
 				districts.enter()
 				   .append("path")
 				   .attr("d", path)
-				   .attr("class", function(d) { return "county " + d.id; })
+				   .attr("class", function(d) { return "district " + d.id; })
 				   .attr("stroke", "white")
 				   .attr("fill", "white")
 					.on("mouseover", mouseover)
 				 	.on("mouseout", mouseout);
 
 				//Title
-				var title = svg.append("g");
+				/*var title = svg.append("g");
 
 				title.append("text")
 					.attr("x", "600px")
@@ -198,15 +202,8 @@
 					.attr("x", "600px")
 					.attr("y", "90px")
 					.classed("subtitle", true)
-					.text("Enrolment data by Uwezo. Collected in 2013.");
+					.text("Enrolment data by Uwezo. Collected in 2013.");*/
 
-
-
-				//Not working as I want it. If you select sequentially, circleHalo() doesn't yet toggle on and off. Also doesn't work if you click on the text, instead of the circle. 
-				function circleHalo() {
-					console.log("hello world");
-					//d3.select(this).classed("halo-circle", true);
-				}
 
 
 				//The initial, aggregate-level map
@@ -215,9 +212,6 @@
 				//Resetting the user selections
 				userSubset = undefined;
 				userAge = undefined;
-
-				d3.selectAll(".halo-circle").classed("halo-circle", false);
-				d3.selectAll(".age-circles").classed("age-circles", true);
 
 /*
 				//Static labels for printing
@@ -289,6 +283,7 @@
 				   		if (d.properties.english) {
 							return quantize(d.properties.english);
 				   		} else {
+				   			console.log(d.id);
 				   			return "rgb(232,232,232)";
 				   		}					   		
 				   	});
