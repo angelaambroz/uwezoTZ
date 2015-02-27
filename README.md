@@ -16,7 +16,8 @@ Uwezo: Test scores, by district, for Tanzania
 8. ~~Make a list of all districts that didn't name-merge.~~
 9. ~~Fix the rural/urban name-merge fails (some have "urban" but not "rural").~~
 10. ~~Fix the "Township Authority" name-merge fails.~~
-11. Remaining name-merge fails!
+11. ~~Remaining name-merge fails!~~ (Trying the 2002 district boundaries.)
+12. ~~Use 2002 geo data instead.~~
   
 
 
