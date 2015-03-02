@@ -4,19 +4,21 @@
 
 <head>
 	<meta charset="utf-8">
-	<title>Preschool enrolment, Kenya, 2013</title>
+	<title>Uwezo, Tanzania, 2013</title>
 	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 	<script src="http://d3js.org/topojson.v1.min.js"></script>
 	<link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
 	<style type="text/css">
 
-.legend {
-	font: 400 14px 'Droid Sans', Arial, sans-serif;
+.legend, #tooltip p {
+	font: 400 12px 'Droid Sans', Arial, sans-serif;
+	color: #4D4D4D;
 }
 
 .buttons {
-	font: 400 16px 'Droid Sans', Arial, sans-serif;
+	font: 400 14px 'Droid Sans', Arial, sans-serif;
 	font-variant: small-caps;
+	border-style: dotted;
 }
 
 .buttons:hover{
@@ -49,7 +51,7 @@
 
 
 		<div id="tooltip" class="hidden" style="left: 429px, top: 489.6px">
-			<p>The percentage of kids in <strong><span id="county">Mandera</span></strong> district who scored the top score on their <strong><span id="subject">English</span> test was <span id="subjectScore">50%</span>.</p>
+			<p>The percentage of kids in <strong><span id="district">Mandera</span></strong> district who scored the top score on their <strong><span id="subject">English</span> test was <span id="subjectScore">50%</span>.</p>
 		</div>
 
 
@@ -57,8 +59,12 @@
 
 		var w = 1000,
 			h = 700,
-			userSubject, swahili, english, math,
+			userSubject, swahili, english, math, test,
 			subjects = ["swahili", "english", "math"];
+
+		function capLetter(string) {
+			return string.charAt(0).toUpperCase() + string.slice(1);
+		}
 
 		var svg = d3.select("body")
 			.append("svg")
@@ -107,7 +113,7 @@
 				.style("left", mousecoord[0]+25 + "px")
 				.style("top", mousecoord[1]-75 + "px");
 
-			d3.select("#county")
+			d3.select("#district")
 				.text(d.id);
 
 			d3.select("#subject")
@@ -115,15 +121,17 @@
 					if (!userSubject) {
 						return "English";
 					} else {
-						return userSubject;
+						return capLetter(userSubject);
 					}
 				});
 
 			d3.select("#subjectScore")
-				.text(function() { 
-					if (!userSubject) {
+				.text(function() {
+					if (!d.properties.english && !d.properties[userSubject]) {
+						return "not available";
+					} else if (!userSubject) {
 						return d3.round(d.properties.english) + "%"; 
-					} else {
+					} else { 
 						return d3.round(d.properties[userSubject]) + "%";
 					}
 					});
@@ -136,33 +144,6 @@
 			d3.select(this).transition().duration(300).style("stroke", "white");
 			d3.select("#tooltip").classed("hidden", true);
 		};
-
-		//On-canvas buttons
-		var buttons = svg.append("g")
-			.attr("class", "buttons");
-
-		for (i = 0; i<subjects.length; i++) {
-
-			console.log(subjects[i]);
-
-			subject = buttons.append("g")
-				.on("click", function() {
-					return subjects[i];
-					console.log(subjects[i]);
-				});
-
-			subject.append("rect")
-				.attr("width", "100px")
-				.attr("height", "50px")
-				.attr("fill", "gray")
-				.attr("x", "700px")
-				.attr("y", function() { return i*50 + 200 + "px"; });
-
-			subject.append("text")
-				.attr("x", "710px")
-				.attr("y", function() { return i*50 + 220 + "px"; })
-				.text(function() { return subjects[i]; });
-		}
 
 
 		//Data
@@ -219,28 +200,12 @@
 				   .append("path")
 				   .attr("d", path)
 				   .attr("class", function(d) { return "district " + d.id; })
-				   .attr("stroke", "white")
+				   .attr("stroke", "rgb(232,232,232)")
 				   .attr("stroke-width", 0.25)
 				   .attr("fill", "white");
 
-				//Title
-				/*var title = svg.append("g");
 
-				title.append("text")
-					.attr("x", "600px")
-					.attr("y", "70px")
-					.classed("title", true)
-					.text("Preschool in Kenya");
-
-				title.append("text")
-					.attr("x", "600px")
-					.attr("y", "90px")
-					.classed("subtitle", true)
-					.text("Enrolment data by Uwezo. Collected in 2013.");*/
-
-
-
-				//The initial, aggregate-level map
+			//The initial, aggregate-level map
 			function firstViz() {
 
 				//Resetting the user selections
@@ -263,24 +228,28 @@
 				  .attr("height", ls_h)
 				  .style("fill", function(d, i) { return d; });
 
-				//gray
-				legend.append("rect")
-					.attr("x", 20)
-					.attr("y", 700)
-					.attr("width", ls_w)
-					.attr("height", ls_h)
-					.style("fill",  "rgb(232,232,232)");
-
 				legend.append("text")
 				  .attr("x", 50)
 				  .attr("y", function(d, i){ return h - (i*ls_h) - ls_h - 4;})
+				  .attr("color", "gray")
 				  .text(function(d, i){ 
 				  	return d3.round(quantize.invertExtent(d)[0]) + "% - " + d3.round(quantize.invertExtent(d)[1]) + "%"; 
 				  });
 
-				legend.append("text")
-				  .attr("x", 50)
-				  .attr("y", 710)
+
+				//Gray
+				var gray = svg.append("rect")
+					.attr("x", 70)
+					.attr("y", 550)
+					.attr("width", ls_w)
+					.attr("height", ls_h)
+					.style("fill",  "rgb(232,232,232)");
+
+				svg.append("text")
+				  .attr("x", 95)
+				  .attr("y", 566)
+				  .attr("color", "gray")
+				  .classed("legend", true)
 				  .text("District names don't match.");
 
 
@@ -292,18 +261,14 @@
 				districts.transition()
 				 	.duration(750)
 				 	.attr("fill", function(d) {
-				   		if (d.properties.english) {
-							return quantize(d.properties.english);
-				   		} else {
-				   			console.log(d.id);
+				 		if (d.properties.english) {
+				 			return quantize(d.properties.english);
+				 		} else {
 				   			return "rgb(232,232,232)";
 				   		}					   		
 				   	});
 
-				districts.on("click", function(d) {
-					console.log(d.properties.english);
-				})
-					.on("mouseover", mouseover)
+				districts.on("mouseover", mouseover)
 				 	.on("mouseout", mouseout);
 
 
@@ -316,33 +281,53 @@
 			//Update function to look at subsets
 			function updateViz() {
 
-			if (!userSubset) { alert("Please select boys or girls first.")}
-
-			userSelection = userSubset + "_" + userAge + "yrs";
-
-			console.log(userSelection);
-
-				d3.select(".tiny-label")
-					.text(function() {
-						return "Selected: " + userSubset + ", " + userAge + " years old.";
-					});
-
 				districts.transition()
 					.duration(750)
 					.attr("fill", function(d) {
-				   		if (d.properties[userSelection]) {
-				   			return quantize(d.properties[userSelection]);
+				   		if (d.properties[userSubject]) {
+				   			return quantize(d.properties[userSubject]);
 				   		} else {
 				   			return "rgb(232,232,232)"; 
 				   		}					   		
 				   });
 
-
-				districts.on("click", function(d) {
-					console.log(d.properties[userSelection]);
-				});
-
 				}; //update function closer
+
+
+			//Tiny legend
+			var tinyLegend = svg.append("text")
+				.attr("x", "630px")
+				.attr("y", "240px")
+				.attr("class", "legend")
+				.text("Please select:");
+
+
+			//On-canvas buttons
+			var buttons = svg.append("g")
+				.attr("class", "buttons");
+
+			for (i = 0; i<subjects.length; i++) {
+
+				subject = buttons.append("g")
+					.on("click", function() {
+						userSubject = d3.select(this).text();
+						updateViz();
+					});
+
+				subject.append("rect")
+					.attr("width", "70px")
+					.attr("height", "25px")
+					.attr("fill", "white")
+					.attr("stroke", "gray")
+					.attr("stroke-dasharray", "5,5")
+					.attr("x", "630px")
+					.attr("y", function() { return i*40 + 250 + "px"; });
+
+				subject.append("text")
+					.attr("x", "640px")
+					.attr("y", function() { return i*40 + 267 + "px"; })
+					.text(function() { return subjects[i]; });
+			}
 
 
 				}); //csv closer
