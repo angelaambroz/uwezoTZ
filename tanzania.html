@@ -74,10 +74,9 @@
 		var quantize = d3.scale.quantize()
 			.domain([0, 100])
 			.range(["rgb(215,25,28)",
+					"rgb(215,25,28)", 
 					"rgb(253,174,97)", 
-					"rgb(166,217,106)", 
 					"rgb(26,150,65)"]);
-
 
 		var projection = d3.geo.mercator()
 			.rotate([5,0,0])
@@ -226,14 +225,19 @@
 				  .attr("y", function(d, i) { return h - (i*ls_h) - 2*ls_h;})
 				  .attr("width", ls_w)
 				  .attr("height", ls_h)
-				  .style("fill", function(d, i) { return d; });
+				  .style("fill", function(d, i) { 
+				  	if (i==0) { return "white"; } 
+				  	else { return d; }
+				  });
 
 				legend.append("text")
 				  .attr("x", 50)
 				  .attr("y", function(d, i){ return h - (i*ls_h) - ls_h - 4;})
-				  .attr("color", "gray")
 				  .text(function(d, i){ 
-				  	return d3.round(quantize.invertExtent(d)[0]) + "% - " + d3.round(quantize.invertExtent(d)[1]) + "%"; 
+				  	if (i==0) { return null; }
+				  	else {
+				  		return d3.round(quantize.invertExtent(d)[0]) + "% - " + d3.round(quantize.invertExtent(d)[1]) + "%"; 
+				  	}
 				  });
 
 
@@ -248,7 +252,6 @@
 				svg.append("text")
 				  .attr("x", 95)
 				  .attr("y", 566)
-				  .attr("color", "gray")
 				  .classed("legend", true)
 				  .text("District names don't match.");
 
