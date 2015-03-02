@@ -45,8 +45,7 @@
 
 		var w = 1000,
 			h = 700,
-			userSubject,
-			formatted = d3.format("%");
+			userSubject;
 
 		var svg = d3.select("body")
 			.append("svg")
@@ -54,7 +53,7 @@
 			.attr("height", h);
 
 		var quantize = d3.scale.quantize()
-			.domain([0, 1])
+			.domain([0, 100])
 			.range(["rgb(215,25,28)",
 					"rgb(253,174,97)", 
 					"rgb(166,217,106)", 
@@ -110,9 +109,9 @@
 			d3.select("#subjectScore")
 				.text(function() { 
 					if (!userSubject) {
-						return formatted(d.properties.english); 
+						return d3.round(d.properties.english) + "%"; 
 					} else {
-						return formatted(d.properties[userSubject]);
+						return d3.round(d.properties[userSubject]) + "%";
 					}
 					});
 
@@ -137,6 +136,7 @@
 	              		d.english = +d.english;
 	              		d.swahili = +d.swahili;
 	              		d.math = +d.math;
+	              		d.district = d.district.replace(/^\s+|\s+$/g,'');
 	             		}
 	            });
 
@@ -168,10 +168,7 @@
 	            	}
 	            }
 
-
-
-
-	          var geoTZ = topojson.feature(json, json.objects.tz);
+	        var geoTZ = topojson.feature(json, json.objects.tz);
 
 			var districts = svg.selectAll("path")
 				.data(geoTZ.features);
@@ -248,10 +245,10 @@
 				  .attr("height", ls_h)
 				  .style("fill", function(d, i) { return d; });
 
-				  //gray
-				  legend.append("rect")
-				  	.attr("x", 20)
-				  	.attr("y", 700)
+				//gray
+				legend.append("rect")
+					.attr("x", 20)
+					.attr("y", 700)
 					.attr("width", ls_w)
 					.attr("height", ls_h)
 					.style("fill",  "rgb(232,232,232)");
@@ -260,7 +257,7 @@
 				  .attr("x", 50)
 				  .attr("y", function(d, i){ return h - (i*ls_h) - ls_h - 4;})
 				  .text(function(d, i){ 
-				  	return formatted(quantize.invertExtent(d)[0]) + " - " + formatted(quantize.invertExtent(d)[1]); 
+				  	return d3.round(quantize.invertExtent(d)[0]) + "% - " + d3.round(quantize.invertExtent(d)[1]) + "%"; 
 				  });
 
 				legend.append("text")

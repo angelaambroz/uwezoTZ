@@ -18,7 +18,8 @@ Uwezo: Test scores, by district, for Tanzania
 10. ~~Fix the "Township Authority" name-merge fails.~~
 11. ~~Remaining name-merge fails!~~ (Trying the 2002 district boundaries.)
 12. ~~Use 2002 geo data instead.~~
-  
+13. Use Zaida's data.
+14. Buttons for `english`, `swahili`, `math`.   
 
 
 ### Notes on GeoJSON/TopoJSON
