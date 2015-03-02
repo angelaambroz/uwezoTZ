@@ -7,9 +7,21 @@
 	<title>Preschool enrolment, Kenya, 2013</title>
 	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 	<script src="http://d3js.org/topojson.v1.min.js"></script>
-	<link href='http://fonts.googleapis.com/css?family=Indie+Flower' rel='stylesheet' type='text/css'>
-	<link href='http://fonts.googleapis.com/css?family=Shadows+Into+Light+Two' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
 	<style type="text/css">
+
+.legend {
+	font: 400 14px 'Droid Sans', Arial, sans-serif;
+}
+
+.buttons {
+	font: 400 16px 'Droid Sans', Arial, sans-serif;
+	font-variant: small-caps;
+}
+
+.buttons:hover{
+	cursor: pointer;
+}
 
 #tooltip {
 	position: absolute;
@@ -45,7 +57,8 @@
 
 		var w = 1000,
 			h = 700,
-			userSubject;
+			userSubject, swahili, english, math,
+			subjects = ["swahili", "english", "math"];
 
 		var svg = d3.select("body")
 			.append("svg")
@@ -124,6 +137,33 @@
 			d3.select("#tooltip").classed("hidden", true);
 		};
 
+		//On-canvas buttons
+		var buttons = svg.append("g")
+			.attr("class", "buttons");
+
+		for (i = 0; i<subjects.length; i++) {
+
+			console.log(subjects[i]);
+
+			subject = buttons.append("g")
+				.on("click", function() {
+					return subjects[i];
+					console.log(subjects[i]);
+				});
+
+			subject.append("rect")
+				.attr("width", "100px")
+				.attr("height", "50px")
+				.attr("fill", "gray")
+				.attr("x", "700px")
+				.attr("y", function() { return i*50 + 200 + "px"; });
+
+			subject.append("text")
+				.attr("x", "710px")
+				.attr("y", function() { return i*50 + 220 + "px"; })
+				.text(function() { return subjects[i]; });
+		}
+
 
 		//Data
 		d3.json("tz_compressed.json", function(json) {
@@ -180,9 +220,8 @@
 				   .attr("d", path)
 				   .attr("class", function(d) { return "district " + d.id; })
 				   .attr("stroke", "white")
-				   .attr("fill", "white")
-					.on("mouseover", mouseover)
-				 	.on("mouseout", mouseout);
+				   .attr("stroke-width", 0.25)
+				   .attr("fill", "white");
 
 				//Title
 				/*var title = svg.append("g");
@@ -202,43 +241,22 @@
 
 
 				//The initial, aggregate-level map
-				function firstViz() {
+			function firstViz() {
 
 				//Resetting the user selections
 				userSubset = undefined;
 				userAge = undefined;
 
-/*
-				//Static labels for printing
-				
-				svg.selectAll("text")
-					    .data(geoCounties.features)
-					    .enter()
-					    .append("text")
-					    .text(function(d, i) {
-						    return d.id;
-					    })
-					    .attr("x", function(d) {
-					        return path.centroid(d)[0];
-					    })
-					    .attr("y", function(d) {
-					        return  path.centroid(d)[1];
-					    })
-					    .attr("font-family", "Arial")
-					    .attr("text-anchor","middle")
-					    .attr("font-size","4pt");
-*/
 
 				//Color legend
-
-				  var legend = svg.selectAll("g.legend")
+				var legend = svg.selectAll("g.legend")
 				  .data(quantize.range())
 				  .enter().append("g")
 				  .attr("class", "legend");
 
-				  var ls_w = 20, ls_h = 20;
+				var ls_w = 20, ls_h = 20;
 
-				  legend.append("rect")
+				legend.append("rect")
 				  .attr("x", 20)
 				  .attr("y", function(d, i) { return h - (i*ls_h) - 2*ls_h;})
 				  .attr("width", ls_w)
@@ -284,20 +302,23 @@
 
 				districts.on("click", function(d) {
 					console.log(d.properties.english);
-				});
+				})
+					.on("mouseover", mouseover)
+				 	.on("mouseout", mouseout);
 
 
-				}//end firstViz()
+			}//end firstViz()
 
-				firstViz();
+		
+		firstViz();
 
 
 			//Update function to look at subsets
 			function updateViz() {
 
-				if (!userSubset) { alert("Please select boys or girls first.")}
+			if (!userSubset) { alert("Please select boys or girls first.")}
 
-				userSelection = userSubset + "_" + userAge + "yrs";
+			userSelection = userSubset + "_" + userAge + "yrs";
 
 			console.log(userSelection);
 
