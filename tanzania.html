@@ -235,6 +235,7 @@
 				  .attr("y", function(d, i){ return h - (i*ls_h) - ls_h - 4;})
 				  .text(function(d, i){ 
 				  	if (i==0) { return null; }
+				  	else if (i==1) { return "0% - 50%"; }
 				  	else {
 				  		return d3.round(quantize.invertExtent(d)[0]) + "% - " + d3.round(quantize.invertExtent(d)[1]) + "%"; 
 				  	}
