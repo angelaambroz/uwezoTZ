@@ -8,10 +8,26 @@
 	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 	<script src="http://d3js.org/topojson.v1.min.js"></script>
 	<link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Oswald:400,700' rel='stylesheet' type='text/css'>
 	<style type="text/css">
 
-.legend, #tooltip p {
+.legend, #tooltip p, #title p {
 	font: 400 12px 'Droid Sans', Arial, sans-serif;
+	color: #4D4D4D;
+}
+
+.highlighted {
+	background-color: yellow;
+}
+
+#title {
+	width: 200px;
+	height: auto;
+	position: absolute;
+}
+
+#title h1 {
+	font: 400 18px 'Oswald', Arial, sans-serif;
 	color: #4D4D4D;
 }
 
@@ -27,9 +43,9 @@
 
 #tooltip {
 	position: absolute;
-	width: 150px;
+	width: auto;
 	height: auto;
-	padding: 5px 10px;
+	padding: 0px 10px;
 	background-color: white;
 	-webkit-border-radius: 10px;
 	-moz-border-radius: 10px;
@@ -43,24 +59,26 @@
 #tooltip.hidden {
 	display: none;
 }
-
-
 	</style>
 </head>
 <body>
 
-
-		<div id="tooltip" class="hidden" style="left: 429px, top: 489.6px">
-			<p>The percentage of kids in <strong><span id="district">Mandera</span></strong> district who scored the top score on their <strong><span id="subject">English</span> test was <span id="subjectScore">50%</span>.</p>
+		<div id="title" style="top: 200px; left: 725px;">
+			<h1>Uwezo, 2013 results: <span class="subject" id="titleSubject">Swahili</span></h1>
+			<p>This map shows Tanzania's 131 districts (as per the 2002 national census, which was used during data collection). It shows the percentage of children, in each district, who <span id="descrip">were able to read a full story in</span> <span id="subjectAgain">Swahili.</span></p>
 		</div>
 
+		<div id="tooltip" class="hidden" style="left: 429px, top: 489.6px">
+			<p><span id="district">Mandera</span> district: <span id="subjectScore">50%</span></p>
+		</div>
 
 	<script type="text/javascript">
 
 		var w = 1000,
 			h = 700,
 			userSubject, swahili, english, math, test,
-			subjects = ["swahili", "english", "math"];
+			subjects = ["swahili", "english", "math"],
+			legend_labels = ["0 - 24%", "25% - 49%", "50% - 74%", "75% - 100%"];
 
 		function capLetter(string) {
 			return string.charAt(0).toUpperCase() + string.slice(1);
@@ -74,8 +92,8 @@
 		var quantize = d3.scale.quantize()
 			.domain([0, 100])
 			.range(["rgb(215,25,28)",
-					"rgb(215,25,28)", 
-					"rgb(253,174,97)", 
+					"rgb(253,174,97)",
+					"rgb(166,217,106)", 
 					"rgb(26,150,65)"]);
 
 		var projection = d3.geo.mercator()
@@ -115,10 +133,10 @@
 			d3.select("#district")
 				.text(d.id);
 
-			d3.select("#subject")
+			d3.selectAll(".subject")
 				.text(function() {
 					if (!userSubject) {
-						return "English";
+						return "Swahili";
 					} else {
 						return capLetter(userSubject);
 					}
@@ -126,10 +144,10 @@
 
 			d3.select("#subjectScore")
 				.text(function() {
-					if (!d.properties.english && !d.properties[userSubject]) {
+					if (!d.properties.swahili && !d.properties[userSubject]) {
 						return "not available";
 					} else if (!userSubject) {
-						return d3.round(d.properties.english) + "%"; 
+						return d3.round(d.properties.swahili) + "%"; 
 					} else { 
 						return d3.round(d.properties[userSubject]) + "%";
 					}
@@ -208,8 +226,7 @@
 			function firstViz() {
 
 				//Resetting the user selections
-				userSubset = undefined;
-				userAge = undefined;
+				userSubject = undefined;
 
 
 				//Color legend
@@ -225,36 +242,30 @@
 				  .attr("y", function(d, i) { return h - (i*ls_h) - 2*ls_h;})
 				  .attr("width", ls_w)
 				  .attr("height", ls_h)
-				  .style("fill", function(d, i) { 
-				  	if (i==0) { return "white"; } 
-				  	else { return d; }
-				  });
+				  .style("fill", function(d, i) { return d; });
 
 				legend.append("text")
 				  .attr("x", 50)
 				  .attr("y", function(d, i){ return h - (i*ls_h) - ls_h - 4;})
 				  .text(function(d, i){ 
-				  	if (i==0) { return null; }
-				  	else if (i==1) { return "0% - 50%"; }
-				  	else {
-				  		return d3.round(quantize.invertExtent(d)[0]) + "% - " + d3.round(quantize.invertExtent(d)[1]) + "%"; 
-				  	}
+				  		if (i==3) { return d3.round(quantize.invertExtent(d)[0]) + "% - " + d3.round(quantize.invertExtent(d)[1]) + "%"; }
+				  		return d3.round(quantize.invertExtent(d)[0]) + "% - " + d3.round(quantize.invertExtent(d)[1]-1) + "%"; 
 				  });
 
 
 				//Gray
 				var gray = svg.append("rect")
 					.attr("x", 70)
-					.attr("y", 550)
+					.attr("y", 535)
 					.attr("width", ls_w)
 					.attr("height", ls_h)
 					.style("fill",  "rgb(232,232,232)");
 
 				svg.append("text")
 				  .attr("x", 95)
-				  .attr("y", 566)
+				  .attr("y", 550)
 				  .classed("legend", true)
-				  .text("District names don't match.");
+				  .text("Data not available.");
 
 
 				//Moving the color legend up and to the left
@@ -265,8 +276,8 @@
 				districts.transition()
 				 	.duration(750)
 				 	.attr("fill", function(d) {
-				 		if (d.properties.english) {
-				 			return quantize(d.properties.english);
+				 		if (d.properties.swahili) {
+				 			return quantize(d.properties.swahili);
 				 		} else {
 				   			return "rgb(232,232,232)";
 				   		}					   		
@@ -294,6 +305,39 @@
 				   			return "rgb(232,232,232)"; 
 				   		}					   		
 				   });
+
+
+				d3.selectAll(".subject")
+					.text(function() {
+					if (!userSubject) { return "Swahili"; } 
+					else { return capLetter(userSubject); }
+					});
+
+				d3.select("#titleSubject")
+					.classed("highlighted", function() {
+						if (!userSubject) { return false; }
+						else { return true; }
+					});
+
+				d3.select("#descrip")
+					.text(function(d) {
+						if (userSubject=="swahili" || userSubject=="english" || !userSubject) {
+							return "were able to read a full story in ";;
+						} else {
+							return "were able to do multiplication.";
+						}
+					});
+
+				d3.select("#subjectAgain")
+					.text(function(d) {
+						if (!userSubject) {
+							return "Swahili.";
+						} else if (userSubject=="math") {
+							return null;
+						} else {
+							return capLetter(userSubject) + ".";
+						}
+					});
 
 				}; //update function closer
 
@@ -332,7 +376,6 @@
 					.attr("y", function() { return i*40 + 267 + "px"; })
 					.text(function() { return subjects[i]; });
 			}
-
 
 				}); //csv closer
 			}); //json closer

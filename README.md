@@ -20,6 +20,11 @@ Uwezo: Test scores, by district, for Tanzania
 12. ~~Use 2002 geo data instead.~~
 13. ~~Use Zaida's data.~~
 14. ~~Design stuff.~~
+15. ~~4-level color scheme. Back to it!~~
+16. Different highlight color.
+17. ~~`swahili` landing.~~
+18. ~~Add title.~~
+19. ~~Change titles so that it's 0% - 24%, etc.~~ 
 
 
 ### Notes on GeoJSON/TopoJSON
